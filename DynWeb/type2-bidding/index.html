@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuctionHouse — Vintage Rolex Submariner</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            color: #222;
+        }
+
+        /* Header */
+        .header {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header .logo {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .header .logo span { color: #e94560; }
+        .header nav a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+
+        /* Main layout */
+        .main {
+            max-width: 1060px;
+            margin: 24px auto;
+            padding: 0 16px;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+        }
+
+        /* Item section */
+        .item-image {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .item-image .placeholder {
+            width: 340px;
+            height: 340px;
+            background: linear-gradient(135deg, #2c3e50 0%, #4a6741 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+        }
+
+        .item-details {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .item-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .item-meta {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+        .item-meta span { margin-right: 16px; }
+        .item-description {
+            font-size: 14px;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        /* Bid panel */
+        .bid-panel {
+            position: sticky;
+            top: 20px;
+        }
+        .bid-card {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .bid-card-header {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .bid-card-header h3 { font-size: 14px; font-weight: 500; }
+        .auction-timer {
+            background: rgba(233,69,96,0.15);
+            color: #e94560;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .current-bid-section {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .current-bid-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .current-bid-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin: 4px 0;
+            transition: color 0.3s;
+        }
+        .current-bid-value.changed { color: #e94560; }
+        .bid-count {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .new-bid-notice {
+            display: none;
+            background: #fff3e0;
+            border-bottom: 1px solid #ffe0b2;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #e65100;
+            text-align: center;
+        }
+        .new-bid-notice.visible { display: block; }
+
+        .bid-form {
+            padding: 20px;
+        }
+        .bid-form label {
+            display: block;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 6px;
+        }
+        .bid-input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .bid-input-row input {
+            flex: 1;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .bid-input-row input:focus {
+            outline: none;
+            border-color: #1a1a2e;
+        }
+        .min-bid-info {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+        .place-bid-btn {
+            width: 100%;
+            padding: 14px;
+            background: #e94560;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .place-bid-btn:hover { background: #d63851; }
+
+        /* Bid history */
+        .bid-history {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .bid-history h3 {
+            padding: 14px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+        .bid-history-list {
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .bid-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid #f8f8f8;
+            font-size: 13px;
+        }
+        .bid-entry:last-child { border-bottom: none; }
+        .bid-entry .bidder {
+            color: #555;
+            font-weight: 500;
+        }
+        .bid-entry .bid-amount {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .bid-entry .bid-time {
+            color: #999;
+            font-size: 12px;
+        }
+        .bid-entry.highlight {
+            background: #fef3e0;
+        }
+
+        /* Result overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .overlay.visible { display: flex; }
+        .result-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            text-align: center;
+        }
+        .result-box .icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 28px;
+        }
+        .result-box .icon.success { background: #e8f5e9; }
+        .result-box .icon.fail { background: #fce4ec; }
+        .result-box h2 { font-size: 20px; margin-bottom: 6px; }
+        .result-box p { font-size: 14px; color: #555; margin-bottom: 16px; }
+        .result-box button {
+            background: #1a1a2e;
+            color: #fff;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">Auction<span>House</span></div>
+    <nav>
+        <a href="#">Browse</a>
+        <a href="#">My Bids</a>
+        <a href="#">Watchlist</a>
+        <a href="#"><span class="live-dot"></span> Live Auctions</a>
+    </nav>
+</div>
+
+<div class="main">
+    <div class="left-col">
+        <div class="item-image">
+            <div class="placeholder">⌚</div>
+        </div>
+        <div class="item-details">
+            <h1 class="item-title">Vintage Rolex Submariner Ref. 5513 (1972)</h1>
+            <div class="item-meta">
+                <span>📍 Lot #4827</span>
+                <span>🏷 Luxury Watches</span>
+                <span>📦 Authenticated</span>
+            </div>
+            <p class="item-description">
+                A rare 1972 Rolex Submariner Ref. 5513 in exceptional condition. Features the iconic matte black
+                dial with patina'd lume markers. Original 9315 bracelet with 380 end links. Full service history
+                available. Comes with original box and papers. This is a highly sought-after vintage piece that
+                has been independently authenticated by WatchCert International.
+            </p>
+        </div>
+    </div>
+
+    <div class="bid-panel">
+        <div class="bid-card">
+            <div class="bid-card-header">
+                <h3>Live Auction</h3>
+                <span class="auction-timer" id="timer">09:52 left</span>
+            </div>
+            <div class="current-bid-section">
+                <div class="current-bid-label">Current Bid</div>
+                <div class="current-bid-value" id="current-bid">$500</div>
+                <div class="bid-count" id="bid-count">4 bids</div>
+            </div>
+            <div class="new-bid-notice" id="new-bid-notice">
+                ⚡ A new bid has been placed! You've been outbid.
+            </div>
+            <div class="bid-form">
+                <label>Your Bid</label>
+                <div class="bid-input-row">
+                    <input type="number" id="bid-input" value="525" step="25" min="525">
+                </div>
+                <div class="min-bid-info" id="min-bid-info">Minimum bid: $525 (current + $25)</div>
+                <button class="place-bid-btn" id="place-bid-btn" onclick="placeBid()">Place Bid</button>
+            </div>
+        </div>
+
+        <div class="bid-history">
+            <h3>Bid History</h3>
+            <div class="bid-history-list" id="bid-history"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Result overlay -->
+<div class="overlay" id="result-overlay">
+    <div class="result-box">
+        <div class="icon" id="result-icon">✓</div>
+        <h2 id="result-title">Bid Placed!</h2>
+        <p id="result-desc"></p>
+        <button onclick="document.getElementById('result-overlay').classList.remove('visible')">OK</button>
+    </div>
+</div>
+
+<script>
+    let ws;
+    let currentBid = 500;
+    let minIncrement = 25;
+
+    function updateBidUI(bid, history) {
+        currentBid = bid;
+        document.getElementById('current-bid').textContent = `$${bid.toLocaleString()}`;
+        document.getElementById('bid-count').textContent = `${history.length} bids`;
+
+        const minBid = bid + minIncrement;
+        document.getElementById('bid-input').min = minBid;
+        document.getElementById('bid-input').value = minBid;
+        document.getElementById('bid-input').step = minIncrement;
+        document.getElementById('min-bid-info').textContent = `Minimum bid: $${minBid.toLocaleString()} (current + $${minIncrement})`;
+
+        // Render bid history (newest first)
+        const listEl = document.getElementById('bid-history');
+        listEl.innerHTML = '';
+        const sorted = [...history].reverse();
+        sorted.forEach((entry, i) => {
+            const div = document.createElement('div');
+            div.className = 'bid-entry' + (i === 0 ? ' highlight' : '');
+            div.innerHTML = `
+                <span class="bidder">${entry.bidder}</span>
+                <span class="bid-amount">$${entry.amount.toLocaleString()}</span>
+                <span class="bid-time">${entry.time}</span>
+            `;
+            listEl.appendChild(div);
+        });
+    }
+
+    function placeBid() {
+        const amount = parseInt(document.getElementById('bid-input').value);
+        if (ws && ws.readyState === WebSocket.OPEN && amount) {
+            ws.send(JSON.stringify({ type: 'place_bid', amount }));
+        }
+    }
+
+    function connectWebSocket() {
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        ws = new WebSocket(`${protocol}//${location.host}/ws`);
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'init') {
+                minIncrement = data.min_increment || 25;
+                updateBidUI(data.current_bid, data.history);
+            }
+
+            if (data.type === 'bid_update') {
+                const bidEl = document.getElementById('current-bid');
+                if (data.current_bid > currentBid) {
+                    bidEl.classList.add('changed');
+                    setTimeout(() => bidEl.classList.remove('changed'), 2000);
+                }
+                if (data.bidder && data.bidder !== 'you') {
+                    document.getElementById('new-bid-notice').classList.add('visible');
+                }
+                updateBidUI(data.current_bid, data.history);
+            }
+
+            if (data.type === 'bid_result') {
+                const iconEl = document.getElementById('result-icon');
+                const titleEl = document.getElementById('result-title');
+                const descEl = document.getElementById('result-desc');
+
+                if (data.success) {
+                    iconEl.className = 'icon success';
+                    iconEl.textContent = '✓';
+                    titleEl.textContent = 'Bid Placed!';
+                    descEl.textContent = data.message;
+                    document.getElementById('new-bid-notice').classList.remove('visible');
+                } else {
+                    iconEl.className = 'icon fail';
+                    iconEl.textContent = '✕';
+                    titleEl.textContent = 'Bid Too Low';
+                    descEl.textContent = data.message;
+                }
+                document.getElementById('result-overlay').classList.add('visible');
+            }
+        };
+
+        ws.onclose = function() {
+            setTimeout(connectWebSocket, 2000);
+        };
+    }
+
+    // Countdown timer
+    let timerSeconds = 592;
+    setInterval(() => {
+        if (timerSeconds > 0) timerSeconds--;
+        const m = Math.floor(timerSeconds / 60);
+        const s = timerSeconds % 60;
+        document.getElementById('timer').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} left`;
+    }, 1000);
+
+    connectWebSocket();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeView — ACME Corp (ACME)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+
+        /* Header */
+        .header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+        .header nav a {
+            color: #8b949e;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        .header nav a:hover { color: #c9d1d9; }
+
+        /* Main layout */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+
+        /* Stock info */
+        .stock-header {
+            margin-bottom: 16px;
+        }
+        .stock-name {
+            font-size: 14px;
+            color: #8b949e;
+        }
+        .stock-ticker {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f0f6fc;
+        }
+        .stock-price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-top: 4px;
+        }
+        .stock-current-price {
+            font-size: 36px;
+            font-weight: 700;
+            color: #f0f6fc;
+            transition: color 0.3s;
+        }
+        .stock-current-price.up { color: #3fb950; }
+        .stock-current-price.down { color: #f85149; }
+        .stock-change {
+            font-size: 16px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .stock-change.up { color: #3fb950; background: rgba(63,185,80,0.1); }
+        .stock-change.down { color: #f85149; background: rgba(248,81,73,0.1); }
+
+        /* Chart */
+        .chart-container {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .chart-header h3 { font-size: 14px; color: #8b949e; }
+        .chart-tabs {
+            display: flex;
+            gap: 4px;
+        }
+        .chart-tabs button {
+            background: none;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .chart-tabs button.active {
+            background: #1f6feb;
+            border-color: #1f6feb;
+            color: #fff;
+        }
+        #price-chart {
+            width: 100%;
+            height: 280px;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .stat-card .label {
+            font-size: 11px;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-card .value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f0f6fc;
+            margin-top: 2px;
+        }
+
+        /* Trade panel */
+        .trade-panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .trade-panel h3 {
+            font-size: 16px;
+            color: #f0f6fc;
+            margin-bottom: 16px;
+        }
+        .trade-tabs {
+            display: flex;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #30363d;
+        }
+        .trade-tabs button {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #8b949e;
+            padding: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .trade-tabs button.active {
+            color: #3fb950;
+            border-bottom-color: #3fb950;
+        }
+        .trade-tabs button:last-child.active {
+            color: #f85149;
+            border-bottom-color: #f85149;
+        }
+        .trade-form-group {
+            margin-bottom: 14px;
+        }
+        .trade-form-group label {
+            display: block;
+            font-size: 12px;
+            color: #8b949e;
+            margin-bottom: 4px;
+        }
+        .trade-form-group input {
+            width: 100%;
+            padding: 10px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #f0f6fc;
+            font-size: 14px;
+        }
+        .trade-form-group input:focus {
+            outline: none;
+            border-color: #1f6feb;
+        }
+        .trade-summary {
+            background: #0d1117;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .trade-summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .trade-summary-row .label { color: #8b949e; }
+        .trade-summary-row .value { color: #f0f6fc; font-weight: 500; }
+        .trade-summary-row.total { border-top: 1px solid #30363d; padding-top: 6px; margin-top: 6px; }
+        .trade-summary-row.total .value { font-size: 16px; font-weight: 700; }
+
+        .buy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #238636;
+            border: 1px solid #2ea043;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .buy-btn:hover { background: #2ea043; }
+        .sell-btn {
+            width: 100%;
+            padding: 12px;
+            background: #da3633;
+            border: 1px solid #f85149;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            display: none;
+        }
+
+        /* Crash alert */
+        .crash-alert {
+            display: none;
+            background: rgba(248,81,73,0.1);
+            border: 1px solid #f85149;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #f85149;
+        }
+        .crash-alert.visible { display: block; }
+
+        /* Live indicator */
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #3fb950;
+            background: rgba(63,185,80,0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .live-badge .dot {
+            width: 6px;
+            height: 6px;
+            background: #3fb950;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Confirmation */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .overlay.visible { display: flex; }
+        .confirm-box {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 28px;
+            max-width: 380px;
+            text-align: center;
+        }
+        .confirm-box h2 { font-size: 20px; color: #f0f6fc; margin-bottom: 8px; }
+        .confirm-box p { color: #8b949e; font-size: 14px; margin-bottom: 16px; }
+        .confirm-box .trade-detail { font-size: 24px; font-weight: 700; color: #3fb950; margin-bottom: 16px; }
+        .confirm-box button {
+            background: #30363d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 8px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">TradeView</div>
+    <nav>
+        <a href="#">Markets</a>
+        <a href="#">Watchlist</a>
+        <a href="#">Portfolio</a>
+        <span class="live-badge"><span class="dot"></span> LIVE</span>
+    </nav>
+</div>
+
+<div class="main">
+    <div class="left-col">
+        <div class="stock-header">
+            <div class="stock-name">ACME Corporation</div>
+            <div class="stock-ticker">ACME</div>
+            <div class="stock-price-row">
+                <span class="stock-current-price up" id="current-price">$185.50</span>
+                <span class="stock-change up" id="price-change">+$0.00 (0.00%)</span>
+            </div>
+        </div>
+
+        <div class="crash-alert" id="crash-alert">
+            ⚠ Significant price drop detected — ACME is down sharply from today's high.
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Price Chart — Today</h3>
+                <div class="chart-tabs">
+                    <button class="active">1D</button>
+                    <button>1W</button>
+                    <button>1M</button>
+                    <button>1Y</button>
+                </div>
+            </div>
+            <canvas id="price-chart"></canvas>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="label">Open</div>
+                <div class="value" id="stat-open">$185.50</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">High</div>
+                <div class="value" id="stat-high">$185.50</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Low</div>
+                <div class="value" id="stat-low">$185.50</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Volume</div>
+                <div class="value" id="stat-volume">2.4M</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-col">
+        <div class="trade-panel">
+            <h3>Trade ACME</h3>
+            <div class="trade-tabs">
+                <button class="active" onclick="setTradeMode('buy')">Buy</button>
+                <button onclick="setTradeMode('sell')">Sell</button>
+            </div>
+            <div class="trade-form-group">
+                <label>Shares</label>
+                <input type="number" id="shares-input" value="10" min="1" oninput="updateSummary()">
+            </div>
+            <div class="trade-form-group">
+                <label>Market Price</label>
+                <input type="text" id="market-price" readonly>
+            </div>
+            <div class="trade-summary">
+                <div class="trade-summary-row">
+                    <span class="label">Shares</span>
+                    <span class="value" id="summary-shares">10</span>
+                </div>
+                <div class="trade-summary-row">
+                    <span class="label">Price per share</span>
+                    <span class="value" id="summary-price">$185.50</span>
+                </div>
+                <div class="trade-summary-row total">
+                    <span class="label">Estimated Total</span>
+                    <span class="value" id="summary-total">$1,855.00</span>
+                </div>
+            </div>
+            <button class="buy-btn" id="buy-btn" onclick="executeTrade('buy')">Buy 10 Shares</button>
+            <button class="sell-btn" id="sell-btn" onclick="executeTrade('sell')">Sell 10 Shares</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation -->
+<div class="overlay" id="trade-overlay">
+    <div class="confirm-box">
+        <h2 id="trade-result-title">Trade Executed</h2>
+        <p id="trade-result-desc"></p>
+        <div class="trade-detail" id="trade-result-detail"></div>
+        <button onclick="document.getElementById('trade-overlay').classList.remove('visible')">Close</button>
+    </div>
+</div>
+
+<script>
+    let ws;
+    let currentPrice = 185.50;
+    let highPrice = 185.50;
+    let lowPrice = 185.50;
+    let tradeMode = 'buy';
+    let priceData = [];
+    const canvas = document.getElementById('price-chart');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth - 32;
+        canvas.height = 280;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawChart() {
+        if (priceData.length < 2) return;
+        const w = canvas.width, h = canvas.height;
+        const padding = { top: 20, right: 60, bottom: 30, left: 10 };
+        const chartW = w - padding.left - padding.right;
+        const chartH = h - padding.top - padding.bottom;
+
+        ctx.clearRect(0, 0, w, h);
+
+        const prices = priceData.map(d => d.price);
+        const minP = Math.min(...prices) - 2;
+        const maxP = Math.max(...prices) + 2;
+        const range = maxP - minP || 1;
+
+        // Grid lines
+        ctx.strokeStyle = '#21262d';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = padding.top + (chartH / 4) * i;
+            ctx.beginPath();
+            ctx.moveTo(padding.left, y);
+            ctx.lineTo(w - padding.right, y);
+            ctx.stroke();
+
+            const priceLabel = maxP - (range / 4) * i;
+            ctx.fillStyle = '#484f58';
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`$${priceLabel.toFixed(2)}`, w - padding.right + 6, y + 4);
+        }
+
+        // Price line
+        const lastPrice = prices[prices.length - 1];
+        const isUp = lastPrice >= prices[0];
+        ctx.strokeStyle = isUp ? '#3fb950' : '#f85149';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+
+        for (let i = 0; i < priceData.length; i++) {
+            const x = padding.left + (i / (priceData.length - 1)) * chartW;
+            const y = padding.top + (1 - (priceData[i].price - minP) / range) * chartH;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Gradient fill
+        const lastX = padding.left + chartW;
+        const gradient = ctx.createLinearGradient(0, padding.top, 0, h - padding.bottom);
+        if (isUp) {
+            gradient.addColorStop(0, 'rgba(63,185,80,0.15)');
+            gradient.addColorStop(1, 'rgba(63,185,80,0.0)');
+        } else {
+            gradient.addColorStop(0, 'rgba(248,81,73,0.15)');
+            gradient.addColorStop(1, 'rgba(248,81,73,0.0)');
+        }
+        ctx.lineTo(lastX, h - padding.bottom);
+        ctx.lineTo(padding.left, h - padding.bottom);
+        ctx.closePath();
+        ctx.fillStyle = gradient;
+        ctx.fill();
+    }
+
+    function updateUI(price, change, changePct, trend) {
+        currentPrice = price;
+        if (price > highPrice) highPrice = price;
+        if (price < lowPrice) lowPrice = price;
+
+        const priceEl = document.getElementById('current-price');
+        const changeEl = document.getElementById('price-change');
+        priceEl.textContent = `$${price.toFixed(2)}`;
+        priceEl.className = 'stock-current-price ' + (change >= 0 ? 'up' : 'down');
+
+        const sign = change >= 0 ? '+' : '';
+        changeEl.textContent = `${sign}$${change.toFixed(2)} (${sign}${changePct.toFixed(2)}%)`;
+        changeEl.className = 'stock-change ' + (change >= 0 ? 'up' : 'down');
+
+        document.getElementById('stat-high').textContent = `$${highPrice.toFixed(2)}`;
+        document.getElementById('stat-low').textContent = `$${lowPrice.toFixed(2)}`;
+        document.getElementById('market-price').value = `$${price.toFixed(2)}`;
+
+        if (trend === 'down') {
+            document.getElementById('crash-alert').classList.add('visible');
+        }
+
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const shares = parseInt(document.getElementById('shares-input').value) || 1;
+        document.getElementById('summary-shares').textContent = shares;
+        document.getElementById('summary-price').textContent = `$${currentPrice.toFixed(2)}`;
+        document.getElementById('summary-total').textContent = `$${(currentPrice * shares).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+        document.getElementById('buy-btn').textContent = `Buy ${shares} Share${shares > 1 ? 's' : ''}`;
+        document.getElementById('sell-btn').textContent = `Sell ${shares} Share${shares > 1 ? 's' : ''}`;
+    }
+
+    function setTradeMode(mode) {
+        tradeMode = mode;
+        const tabs = document.querySelectorAll('.trade-tabs button');
+        tabs[0].classList.toggle('active', mode === 'buy');
+        tabs[1].classList.toggle('active', mode === 'sell');
+        document.getElementById('buy-btn').style.display = mode === 'buy' ? 'block' : 'none';
+        document.getElementById('sell-btn').style.display = mode === 'sell' ? 'block' : 'none';
+    }
+
+    function executeTrade(action) {
+        const shares = parseInt(document.getElementById('shares-input').value) || 1;
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: action, shares }));
+        }
+    }
+
+    function connectWebSocket() {
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        ws = new WebSocket(`${protocol}//${location.host}/ws`);
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'init') {
+                currentPrice = data.price;
+                if (data.history) {
+                    priceData = data.history;
+                    drawChart();
+                }
+                updateUI(data.price, 0, 0, 'stable');
+            }
+
+            if (data.type === 'tick') {
+                priceData.push({ step: data.step, price: data.price });
+                if (priceData.length > 100) priceData.shift();
+                updateUI(data.price, data.change, data.change_pct, data.trend);
+                drawChart();
+            }
+
+            if (data.type === 'trade_result') {
+                const title = data.action === 'buy' ? 'Purchase Complete' : 'Sale Complete';
+                const desc = `${data.action === 'buy' ? 'Bought' : 'Sold'} ${data.shares} shares of ACME at $${data.price_at_execution.toFixed(2)}`;
+                document.getElementById('trade-result-title').textContent = title;
+                document.getElementById('trade-result-desc').textContent = desc;
+                document.getElementById('trade-result-detail').textContent = `$${data.total.toFixed(2)}`;
+                document.getElementById('trade-result-detail').style.color = data.action === 'buy' ? '#3fb950' : '#f85149';
+                document.getElementById('trade-overlay').classList.add('visible');
+            }
+        };
+
+        ws.onclose = function() {
+            setTimeout(connectWebSocket, 2000);
+        };
+    }
+
+    connectWebSocket();
+</script>
+
+</body>
+</html>

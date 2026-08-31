@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FormGuard - Contact Us</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a1a2e;
+        }
+
+        .page-container {
+            display: flex;
+            gap: 0;
+            max-width: 960px;
+            width: 100%;
+            margin: 24px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            padding: 48px 36px;
+            width: 340px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar h2 {
+            color: #fff;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .sidebar p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .contact-info {
+            list-style: none;
+        }
+
+        .contact-info li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .contact-info li svg {
+            width: 18px;
+            height: 18px;
+            fill: rgba(255, 255, 255, 0.5);
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .form-container {
+            background: #fff;
+            padding: 48px 40px;
+            flex: 1;
+        }
+
+        .form-header {
+            margin-bottom: 28px;
+        }
+
+        .form-header h3 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+
+        .form-header p {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-group label .required {
+            color: #e53e3e;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #1a1a2e;
+            background: #fafafa;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* CAPTCHA Section */
+        .captcha-section {
+            background: #f9fafb;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .captcha-section.expired {
+            border-color: #fca5a5;
+            background: #fef2f2;
+        }
+
+        .captcha-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .captcha-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .captcha-title svg {
+            width: 16px;
+            height: 16px;
+            fill: #6b7280;
+        }
+
+        .captcha-timer {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .captcha-timer .time {
+            font-weight: 700;
+            color: #3b82f6;
+            min-width: 32px;
+        }
+
+        .captcha-timer .time.warning {
+            color: #f59e0b;
+        }
+
+        .captcha-timer .time.expired {
+            color: #ef4444;
+        }
+
+        .timer-ring {
+            width: 28px;
+            height: 28px;
+            position: relative;
+        }
+
+        .timer-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .timer-ring circle {
+            fill: none;
+            stroke-width: 3;
+        }
+
+        .timer-ring .bg {
+            stroke: #e5e7eb;
+        }
+
+        .timer-ring .progress {
+            stroke: #3b82f6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.1s linear, stroke 0.3s;
+        }
+
+        .timer-ring .progress.warning {
+            stroke: #f59e0b;
+        }
+
+        .timer-ring .progress.expired {
+            stroke: #ef4444;
+        }
+
+        .captcha-display {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 14px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .captcha-display.expired {
+            opacity: 0.4;
+        }
+
+        .captcha-display .expired-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(239, 68, 68, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #ef4444;
+            font-size: 16px;
+            letter-spacing: 2px;
+        }
+
+        /* Math CAPTCHA */
+        .math-captcha {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            letter-spacing: 4px;
+            font-family: 'Georgia', serif;
+        }
+
+        .math-captcha .equals {
+            color: #6b7280;
+            margin-left: 8px;
+        }
+
+        .math-captcha .qmark {
+            color: #3b82f6;
+            font-size: 32px;
+        }
+
+        /* Text CAPTCHA - rendered via canvas/SVG */
+        .text-captcha-canvas {
+            position: relative;
+            display: inline-block;
+        }
+
+        .text-captcha-char {
+            display: inline-block;
+            font-weight: 800;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            transition: transform 0.3s;
+        }
+
+        .noise-line {
+            position: absolute;
+            height: 2px;
+            background: rgba(0, 0, 0, 0.15);
+            transform-origin: left center;
+        }
+
+        .captcha-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .captcha-input-row input {
+            flex: 1;
+            padding: 12px 14px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #1a1a2e;
+            background: #fff;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .captcha-input-row input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .refresh-btn {
+            width: 42px;
+            height: 42px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .refresh-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        .refresh-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: #6b7280;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-message {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status-message.success {
+            display: block;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #15803d;
+        }
+
+        .status-message.error {
+            display: block;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .initial-captcha {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                padding: 32px 24px;
+            }
+            .form-container {
+                padding: 32px 24px;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="sidebar">
+            <div>
+                <h2>Get in Touch</h2>
+                <p>Have a question or want to work together? Fill out the form and we'll get back to you within 24 hours.</p>
+                <ul class="contact-info">
+                    <li>
+                        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                        contact@formguard.io
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                        +1 (555) 123-4567
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        123 Innovation Drive, San Francisco, CA
+                    </li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                FormGuard Inc. &copy; 2026. All rights reserved.
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="form-header">
+                <h3>Send us a Message</h3>
+                <p>Please complete the CAPTCHA verification before submitting.</p>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Full Name <span class="required">*</span></label>
+                    <input type="text" id="name" placeholder="John Doe" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>Email Address <span class="required">*</span></label>
+                    <input type="email" id="email" placeholder="john@example.com" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Subject</label>
+                <select id="subject">
+                    <option value="">Select a topic...</option>
+                    <option value="general">General Inquiry</option>
+                    <option value="support">Technical Support</option>
+                    <option value="billing">Billing Question</option>
+                    <option value="partnership">Partnership</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Message <span class="required">*</span></label>
+                <textarea id="message" placeholder="Write your message here..."></textarea>
+            </div>
+
+            <!-- CAPTCHA Section -->
+            <div class="captcha-section" id="captcha-section">
+                <div class="captcha-header">
+                    <div class="captcha-title">
+                        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                        CAPTCHA Verification
+                    </div>
+                    <div class="captcha-timer" id="captcha-timer" style="display: none;">
+                        <div class="timer-ring">
+                            <svg width="28" height="28" viewBox="0 0 28 28">
+                                <circle class="bg" cx="14" cy="14" r="12"/>
+                                <circle class="progress" id="timer-ring-progress" cx="14" cy="14" r="12"
+                                    stroke-dasharray="75.4" stroke-dashoffset="0"/>
+                            </svg>
+                        </div>
+                        <span class="time" id="timer-text">60s</span>
+                    </div>
+                </div>
+
+                <div class="captcha-display" id="captcha-display">
+                    <span class="initial-captcha" id="initial-captcha">Click refresh to load CAPTCHA</span>
+                </div>
+
+                <div class="captcha-input-row">
+                    <input type="text" id="captcha-answer" placeholder="Enter CAPTCHA answer" autocomplete="off">
+                    <button class="refresh-btn" onclick="generateCaptcha()" title="Refresh CAPTCHA">
+                        <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn-submit" id="submit-btn" onclick="submitForm()">
+                Submit Message
+            </button>
+
+            <div class="status-message" id="status-message"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentCaptchaId = null;
+        let captchaExpiryTime = null;
+        let captchaExpirySeconds = 60;
+        let timerInterval = null;
+        const CIRCUMFERENCE = 2 * Math.PI * 12; // r=12
+
+        // Auto-load CAPTCHA on page load
+        window.addEventListener('load', () => {
+            generateCaptcha();
+        });
+
+        async function generateCaptcha() {
+            // Clear existing timer
+            if (timerInterval) clearInterval(timerInterval);
+
+            const display = document.getElementById('captcha-display');
+            const answerInput = document.getElementById('captcha-answer');
+            const section = document.getElementById('captcha-section');
+
+            display.innerHTML = '<span class="initial-captcha">Loading...</span>';
+            display.classList.remove('expired');
+            section.classList.remove('expired');
+            answerInput.value = '';
+
+            // Clear status
+            const statusEl = document.getElementById('status-message');
+            statusEl.className = 'status-message';
+            statusEl.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/generate-captcha', { method: 'POST' });
+                const data = await response.json();
+
+                currentCaptchaId = data.captcha_id;
+                captchaExpirySeconds = data.expires_in;
+                captchaExpiryTime = (data.created_at + data.expires_in) * 1000;
+
+                renderCaptcha(data.display_data);
+                startTimer();
+
+                document.getElementById('captcha-timer').style.display = 'flex';
+            } catch (err) {
+                display.innerHTML = '<span class="initial-captcha" style="color:#ef4444;">Failed to load CAPTCHA</span>';
+                console.error('Failed to generate CAPTCHA:', err);
+            }
+        }
+
+        function renderCaptcha(displayData) {
+            const display = document.getElementById('captcha-display');
+
+            if (displayData.type === 'math') {
+                display.innerHTML = `
+                    <div class="math-captcha">
+                        ${displayData.expression} <span class="equals">=</span> <span class="qmark">?</span>
+                    </div>
+                `;
+            } else if (displayData.type === 'text') {
+                let html = '<div class="text-captcha-canvas" style="position:relative; width:' +
+                    (displayData.chars.length * 38 + 20) + 'px; height:60px;">';
+
+                // Render characters
+                displayData.chars.forEach(ch => {
+                    html += `<span class="text-captcha-char" style="
+                        position: absolute;
+                        left: ${ch.x_offset + 10}px;
+                        top: ${28 + ch.y_offset}px;
+                        transform: rotate(${ch.rotation}deg);
+                        color: ${ch.color};
+                        font-size: ${ch.font_size}px;
+                    ">${ch.char}</span>`;
+                });
+
+                // Render noise lines
+                for (let i = 0; i < displayData.noise_lines; i++) {
+                    const x = Math.random() * 200;
+                    const y = Math.random() * 50 + 5;
+                    const width = Math.random() * 80 + 40;
+                    const angle = Math.random() * 40 - 20;
+                    html += `<div class="noise-line" style="
+                        left: ${x}px;
+                        top: ${y}px;
+                        width: ${width}px;
+                        transform: rotate(${angle}deg);
+                    "></div>`;
+                }
+
+                html += '</div>';
+                display.innerHTML = html;
+            }
+        }
+
+        function startTimer() {
+            const timerText = document.getElementById('timer-text');
+            const timerRing = document.getElementById('timer-ring-progress');
+            const display = document.getElementById('captcha-display');
+            const section = document.getElementById('captcha-section');
+
+            timerInterval = setInterval(() => {
+                const now = Date.now();
+                const remaining = Math.max(0, (captchaExpiryTime - now) / 1000);
+                const pct = remaining / captchaExpirySeconds;
+                const offset = CIRCUMFERENCE * (1 - pct);
+
+                timerRing.style.strokeDashoffset = offset;
+
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerText.textContent = 'EXPIRED';
+                    timerText.className = 'time expired';
+                    timerRing.classList.add('expired');
+                    display.classList.add('expired');
+                    section.classList.add('expired');
+
+                    // Add expired overlay
+                    const overlay = document.createElement('div');
+                    overlay.className = 'expired-overlay';
+                    overlay.textContent = 'EXPIRED';
+                    display.appendChild(overlay);
+                } else if (remaining <= 15) {
+                    timerText.textContent = remaining.toFixed(1) + 's';
+                    timerText.className = 'time warning';
+                    timerRing.classList.add('warning');
+                    timerRing.classList.remove('expired');
+                } else {
+                    timerText.textContent = Math.ceil(remaining) + 's';
+                    timerText.className = 'time';
+                    timerRing.classList.remove('warning', 'expired');
+                }
+            }, 100);
+        }
+
+        async function submitForm() {
+            const btn = document.getElementById('submit-btn');
+            const statusEl = document.getElementById('status-message');
+
+            const formData = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value.trim(),
+            };
+
+            const captchaAnswer = document.getElementById('captcha-answer').value.trim();
+
+            // Client-side validation
+            if (!formData.name || !formData.email || !formData.message) {
+                statusEl.className = 'status-message error';
+                statusEl.textContent = 'Please fill in all required fields.';
+                statusEl.style.display = 'block';
+                return;
+            }
+
+            if (!captchaAnswer) {
+                statusEl.className = 'status-message error';
+                statusEl.textContent = 'Please enter the CAPTCHA answer.';
+                statusEl.style.display = 'block';
+                return;
+            }
+
+            if (!currentCaptchaId) {
+                statusEl.className = 'status-message error';
+                statusEl.textContent = 'Please load a CAPTCHA first by clicking the refresh button.';
+                statusEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Submitting...';
+
+            try {
+                const response = await fetch('/api/submit-form', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        captcha_id: currentCaptchaId,
+                        captcha_answer: captchaAnswer,
+                        form_data: formData,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusEl.className = 'status-message success';
+                    statusEl.textContent = data.message;
+                    statusEl.style.display = 'block';
+                    if (timerInterval) clearInterval(timerInterval);
+                } else {
+                    statusEl.className = 'status-message error';
+                    statusEl.textContent = data.error;
+                    statusEl.style.display = 'block';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                statusEl.className = 'status-message error';
+                statusEl.textContent = 'Network error. Please try again.';
+                statusEl.style.display = 'block';
+                btn.disabled = false;
+            }
+
+            btn.innerHTML = 'Submit Message';
+        }
+    </script>
+</body>
+</html>

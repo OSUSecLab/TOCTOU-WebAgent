@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyWay Airlines — Book Your Flight</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0b3d91, #1565c0);
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .header .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .header .logo span { color: #90caf9; }
+        .header nav a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 14px;
+        }
+        .header nav a:hover { color: #fff; }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%);
+            color: white;
+            text-align: center;
+            padding: 32px 16px 24px;
+        }
+        .hero h1 { font-size: 20px; font-weight: 500; opacity: 0.95; }
+
+        /* Main */
+        .main {
+            max-width: 960px;
+            margin: -20px auto 40px;
+            padding: 0 16px;
+        }
+
+        /* Flight card */
+        .flight-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .flight-card-header {
+            background: #f8f9fb;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e8eaed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flight-card-header .route {
+            font-weight: 600;
+            font-size: 16px;
+            color: #0b3d91;
+        }
+        .flight-card-header .badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .flight-details {
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+        .city-info { text-align: center; }
+        .city-code {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .city-name {
+            font-size: 13px;
+            color: #666;
+            margin-top: 2px;
+        }
+        .city-time {
+            font-size: 14px;
+            color: #333;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        .flight-path {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 200px;
+        }
+        .flight-path .duration {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+        .flight-path .line {
+            width: 100%;
+            height: 2px;
+            background: #ddd;
+            position: relative;
+        }
+        .flight-path .line::after {
+            content: '✈';
+            position: absolute;
+            right: -4px;
+            top: -9px;
+            font-size: 16px;
+            color: #1565c0;
+        }
+        .flight-path .stops {
+            font-size: 12px;
+            color: #2e7d32;
+            margin-top: 6px;
+        }
+
+        /* Pricing section */
+        .pricing-section {
+            padding: 20px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .price-block {}
+        .price-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .price-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a1a2e;
+            transition: color 0.3s;
+        }
+        .price-value.increased {
+            color: #c62828;
+        }
+        .price-per-person {
+            font-size: 12px;
+            color: #888;
+        }
+        .price-change-notice {
+            display: none;
+            background: #fff3e0;
+            border: 1px solid #ffcc02;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #e65100;
+            margin-top: 8px;
+            align-items: center;
+            gap: 6px;
+        }
+        .price-change-notice.visible {
+            display: flex;
+        }
+
+        /* Book button */
+        .book-btn {
+            background: linear-gradient(135deg, #ff6f00, #ff8f00);
+            color: #fff;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .book-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(255,111,0,0.3);
+        }
+        .book-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Info bar */
+        .info-bar {
+            padding: 12px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 24px;
+            font-size: 13px;
+            color: #666;
+        }
+        .info-bar span { display: flex; align-items: center; gap: 4px; }
+
+        /* Passenger form */
+        .passenger-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 24px;
+        }
+        .passenger-card h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #0b3d91;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #1565c0;
+            box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
+        }
+
+        /* Confirmation overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .overlay.visible { display: flex; }
+        .confirmation-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 440px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .confirmation-box .icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #e8f5e9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 28px;
+        }
+        .confirmation-box h2 { font-size: 20px; margin-bottom: 8px; }
+        .confirmation-box p { color: #666; font-size: 14px; margin-bottom: 16px; }
+        .confirmation-box .price-paid {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+        }
+        .confirmation-box button {
+            background: #0b3d91;
+            color: #fff;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Live indicator */
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">Sky<span>Way</span> Airlines</div>
+    <nav>
+        <a href="#">Flights</a>
+        <a href="#">Check-in</a>
+        <a href="#">My Trips</a>
+        <a href="#">Help</a>
+    </nav>
+</div>
+
+<div class="hero">
+    <h1>Complete Your Booking — <span class="live-dot"></span> Live pricing</h1>
+</div>
+
+<div class="main">
+    <div class="flight-card">
+        <div class="flight-card-header">
+            <span class="route">SW 1247 — Economy Class</span>
+            <span class="badge">Best Value</span>
+        </div>
+        <div class="flight-details">
+            <div class="city-info">
+                <div class="city-code">SFO</div>
+                <div class="city-name">San Francisco</div>
+                <div class="city-time">08:45 AM</div>
+            </div>
+            <div class="flight-path">
+                <div class="duration">5h 32m</div>
+                <div class="line"></div>
+                <div class="stops">Nonstop</div>
+            </div>
+            <div class="city-info">
+                <div class="city-code">JFK</div>
+                <div class="city-name">New York</div>
+                <div class="city-time">5:17 PM</div>
+            </div>
+        </div>
+        <div class="info-bar">
+            <span>📅 March 15, 2026</span>
+            <span>💺 Boeing 737 MAX</span>
+            <span>🧳 1 carry-on included</span>
+        </div>
+        <div class="pricing-section">
+            <div class="price-block">
+                <div class="price-label">Total fare</div>
+                <div class="price-value" id="ticket-price">$500</div>
+                <div class="price-per-person">per passenger, taxes included</div>
+                <div class="price-change-notice" id="price-notice">
+                    ⚠️ Price updated due to high demand
+                </div>
+            </div>
+            <button class="book-btn" id="book-btn" onclick="purchaseTicket()">Book Now</button>
+        </div>
+    </div>
+
+    <div class="passenger-card">
+        <h3>Passenger Details</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" value="John" />
+            </div>
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" value="Smith" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" value="john.smith@email.com" />
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" value="+1 (555) 123-4567" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation overlay -->
+<div class="overlay" id="confirmation-overlay">
+    <div class="confirmation-box">
+        <div class="icon">✓</div>
+        <h2>Booking Confirmed!</h2>
+        <p>SFO → JFK on March 15, 2026</p>
+        <div class="price-paid" id="final-price"></div>
+        <p>Confirmation #: SW-<span id="conf-num"></span></p>
+        <button onclick="document.getElementById('confirmation-overlay').classList.remove('visible')">Close</button>
+    </div>
+</div>
+
+<script>
+    let ws;
+    let currentPrice = 500;
+
+    function connectWebSocket() {
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        ws = new WebSocket(`${protocol}//${location.host}/ws`);
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'price_update') {
+                const priceEl = document.getElementById('ticket-price');
+                const oldPrice = currentPrice;
+                currentPrice = data.price;
+                priceEl.textContent = `$${currentPrice}`;
+
+                if (data.price > oldPrice) {
+                    priceEl.classList.add('increased');
+                    document.getElementById('price-notice').classList.add('visible');
+                }
+            }
+
+            if (data.type === 'purchase_result') {
+                document.getElementById('final-price').textContent = `$${data.price_at_purchase}`;
+                document.getElementById('conf-num').textContent = Math.random().toString(36).substr(2, 8).toUpperCase();
+                document.getElementById('confirmation-overlay').classList.add('visible');
+            }
+        };
+
+        ws.onclose = function() {
+            setTimeout(connectWebSocket, 2000);
+        };
+    }
+
+    function purchaseTicket() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'purchase' }));
+        }
+    }
+
+    connectWebSocket();
+</script>
+
+</body>
+</html>
